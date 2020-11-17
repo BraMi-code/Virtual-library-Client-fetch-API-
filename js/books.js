@@ -21,7 +21,6 @@ var book = {
         </div>
     `.trim(),
     showBookPage: function() {
-        document.getElementById('testProtectedButton').style.display  = "none";
         document.getElementById(this.containerId).innerHTML = this.libraryTemplate;
         document.getElementById('createBook').onclick = this.showAddBook.bind(this);
         document.getElementById('getBooks').onclick = this.showAllBooksTemplate.bind(this);

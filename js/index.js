@@ -33,9 +33,9 @@ var app = {
     // Update DOM on a Received Event
     receivedEvent: function(id) {
         console.log("Recieved event: " + id);
-
-        document.getElementById('testProtectedButton').onclick = this.testProtected;
-        //user.init('userAuth);
+        user.showLogin();
+       // document.getElementById('testProtectedButton').onclick = this.testProtected;
+       // user.init('userAuth');
     },
     testProtected: function() {
         const xhttp = new XMLHttpRequest();
