@@ -177,3 +177,11 @@ body {
 .inputFind {
     display: none;
 }
+
+.editBookPage {
+    display: none;
+}
+
+.findBookPage {
+    display: block;
+}
