@@ -220,7 +220,6 @@ var book = {
                 document.getElementById('numOfPages').innerHTML = res.numOfPages;
                 if (book.showEditBook) {
                     document.querySelector('[name="isbn"]').value = res.isbn;
-                    //document.getElementById('isbn').innerHTML;
                     document.querySelector('[name="title"]').value = res.title;
                     document.querySelector('[name="author"]').value = res.author;
                     console.log(res.publish_date.substring(0,10));
