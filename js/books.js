@@ -26,7 +26,7 @@ var book = {
         document.getElementById('getBooks').onclick = this.showAllBooksTemplate.bind(this);
         document.getElementById('getBook').onclick = this.showInput.bind(this);
     },
-    showInput: function() {
+    showInput: function(isbn) {
         document.getElementById('findByIsbn').style.display = "block";
         document.getElementById('getBook').onclick = this.findBook.bind(this);
    },
@@ -145,7 +145,7 @@ var book = {
                 <div class="spinner" id="spinner"></div>
                 <h3>Book found!</h3>
                 <div id="book-info">
-                    ISBN: <p id="isbn"  class="book-info"></p>
+                    ISBN: <p id="isbn" class="book-info"></p>
                     TITLE: <p id="title" class="book-info"></p>
                     AUTHOR: <p id="author" class="book-info"></p>
                     PUBLISH DATE: <p id="publish_date" class="book-info"></p>
@@ -162,7 +162,7 @@ var book = {
         
             <div id="editBookPg" class="editBookPage">
                 <div>
-                    <label for="isbn">ISBN</label>
+                    <label for="isbn-get">ISBN</label>
                     <input type="text" placeholder="isbn No." id="isbn" name="isbn">
                 </div>
                 <div>
@@ -202,9 +202,11 @@ var book = {
     findBook: function() {
         user.showSpinner();
         var isbn = document.querySelector('[name="isbn-get"]').value;
+        
         console.log(isbn);
+
         const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
+        xhttp.onreadystatechange = function(isbn) {
             if (this.readyState==4 && this.status==200) {
                 var res = JSON.parse(xhttp.responseText);
                 console.log(xhttp.response);
@@ -218,6 +220,7 @@ var book = {
                 document.getElementById('numOfPages').innerHTML = res.numOfPages;
                 if (book.showEditBook) {
                     document.querySelector('[name="isbn"]').value = res.isbn;
+                    //document.getElementById('isbn').innerHTML;
                     document.querySelector('[name="title"]').value = res.title;
                     document.querySelector('[name="author"]').value = res.author;
                     console.log(res.publish_date.substring(0,10));
@@ -227,7 +230,7 @@ var book = {
                 }
             }
         }
-        xhttp.open("GET", API_URL + "/book/" + document.querySelector('[name="isbn-get"]').value, true);
+        xhttp.open("GET", API_URL + "/book/" + isbn, true);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhttp.send();
     },
