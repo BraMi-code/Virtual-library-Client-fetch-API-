@@ -1,6 +1,6 @@
 var user = {
     containerId: 'userAuth',
-    apiServer: API_URL,
+    apiServer: API_URL + ':' + API_PORT,
     loginTemplate: `
         <div class="userAuth">
             <div class="userForm">

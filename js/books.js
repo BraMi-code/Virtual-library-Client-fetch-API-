@@ -1,6 +1,6 @@
 var book = {
     containerId: 'book',
-    apiServer: API_URL,
+    apiServer: API_URL + ':' + API_PORT,
     libraryTemplate: `
         <div id="book" class="bookAuth center">
             <div class="bookForm" id="bookP">
@@ -70,7 +70,7 @@ var book = {
         document.getElementById('backBtn').onclick = this.showBookPage.bind(this);
     },
     createBook: function() {
-        console.log("Here goes code for saving book");
+        user.showSpinner();
         var book = {
             "isbn": document.querySelector('[name="isbn"]').value,
             "title": document.querySelector('[name="title"]').value,
@@ -79,20 +79,19 @@ var book = {
             "publisher": document.querySelector('[name="publisher"]').value,
             "numOfPages": document.querySelector('[name="numOfPages"]').value
         };
-        user.showSpinner();
         console.log(book);
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState==4 && this.status==200) {
                 console.log(xhttp.responseText);
-                user.hideSpinner();
                 user.exitAuthAndMsg("Book created!");
+                user.hideSpinner();
                 /* book.showBookPage; Ovdje bih ubacila i bind,
                  ali ne kontam kakvu ulogu ima.
                  Htjela bih da me vrati na pocetnu kada se knjiga sacuva u bazi */
             }
         };
-        xhttp.open("POST", API_URL + "/book", true);
+        xhttp.open("POST", this.apiServer + "/book", true);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhttp.send(JSON.stringify(book));
     },
@@ -129,12 +128,12 @@ var book = {
                 console.log(xhttp.responseText);
                 var res = JSON.parse(xhttp.responseText);
                 var bookList = res.length;
-                for (i=0; i<=bookList; i++) {
+                for (i=0; i < bookList; i++) {
                     document.getElementById('bookList').innerHTML += "<td>" + res[i].isbn + "</td>" + "<td>" + res[i].title + "</td>" + "<td>" + res[i].author + "</td>";
                 }
             }
         };
-        xhttp.open("GET", API_URL + "/books", true);
+        xhttp.open("GET", this.apiServer + "/books", true);
         xhttp.send();
     },
     bookFoundTemplate: `
@@ -142,6 +141,7 @@ var book = {
         <div class="bookForm" id="bookFound">
             <div id="bookFoundPg" class="findBookPage">
                 <button id="backBtn">BACK</button>
+                <div class="error" id="error"></div>
                 <div class="spinner" id="spinner"></div>
                 <h3>Book found!</h3>
                 <div id="book-info">
@@ -206,7 +206,7 @@ var book = {
         console.log(isbn);
 
         const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function(isbn) {
+        xhttp.onreadystatechange = function() {
             if (this.readyState==4 && this.status==200) {
                 var res = JSON.parse(xhttp.responseText);
                 console.log(xhttp.response);
@@ -227,16 +227,16 @@ var book = {
                     document.querySelector('[name="publisher"]').value = res.publisher;
                     document.querySelector('[name="numOfPages"]').value = res.numOfPages;  
                 }
-            }
+            } 
         }
-        xhttp.open("GET", API_URL + "/book/" + isbn, true);
+        xhttp.open("GET", this.apiServer + "/book/" + isbn, true);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhttp.send();
     },
     deletePrompt: function() {
         var isbn = document.getElementById('isbn').innerHTML;
         console.log(isbn);
-        result = confirm("Are you sure you want to delete the book with isbn: " + isbn + "?");
+        var result = confirm("Are you sure you want to delete the book with isbn: " + isbn + "?");
         if (result) {
             user.showSpinner();
             this.deleteBook();
@@ -267,7 +267,7 @@ var book = {
                 */
             }
         }
-        xhttp.open("DELETE", API_URL + "/book/" + isbn, true);
+        xhttp.open("DELETE", this.apiServer + "/book/" + isbn, true);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhttp.send();
     },
@@ -300,7 +300,7 @@ var book = {
                 user.exitAuthAndMsg('Book edited successfully!');
             }
         };
-        xhttp.open("PUT", API_URL + "/book/" + document.querySelector('[name="isbn"]').value, true);
+        xhttp.open("PUT", this.apiServer + "/book/" + document.querySelector('[name="isbn"]').value, true);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhttp.send(JSON.stringify(book));
     }
