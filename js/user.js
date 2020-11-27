@@ -37,7 +37,6 @@ var user = {
             this.showError("Password field can't be empty!");
             return;
         }
-
         this.hideError();
         this.showSpinner();
 
@@ -148,7 +147,7 @@ var user = {
                         console.log("unknown error");
                         this.showError("Unknown Error Occured. Server response not received. Try again later.");
                 }
-                this.hideSpinner();
+                user.hideSpinner();
             }
         }.bind(this);
 
@@ -210,6 +209,7 @@ var user = {
     logout: function () {
         // to logout user just set token to empty string
         localStorage.setItem('token', '');
+        location.reload();
     },
     getToken: function () {
         return localStorage.getItem('token');
@@ -222,5 +222,21 @@ var user = {
         }).join(''));
     
         return JSON.parse(jsonPayload);
+    },
+    secSinceEpoch: function() {
+        var token = this.getToken();
+        var payload = this.parseJwt(token);
+        console.log(payload.exp);
+        var date = new Date();
+        var seconds = Math.round(date.getTime() / 1000);
+        console.log(seconds);
+        if (payload.exp > seconds) {
+            console.log("Not expired!");
+            book.showBookPage();
+        }
+        else {
+            console.log("Token expired!");
+            user.showLogin();
+        }
     }
 };
