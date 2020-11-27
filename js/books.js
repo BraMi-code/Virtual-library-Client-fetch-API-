@@ -2,6 +2,7 @@ var book = {
     containerId: 'book',
     apiServer: API_URL + ':' + API_PORT,
     libraryTemplate: `
+    <div class="userAuth">
         <div id="book" class="bookAuth center">
             <div class="bookForm" id="bookP">
                 <div class="spinner" id="spinner"></div>
@@ -15,10 +16,15 @@ var book = {
                     <button id="getBook" class="button">Find A Book</button>
                     <div id="findByIsbn" class="inputFind">
                         <input placeholder="ISBN" name="isbn-get">
+                        <div class="error" id="error"></div>
                     </div>
+                </div>
+                <div>
+                    <button onclick="user.logout()">LOGOUT</button>
                 </div>
             </div>
         </div>
+    </div>
     `.trim(),
     showBookPage: function() {
         document.getElementById(this.containerId).innerHTML = this.libraryTemplate;
@@ -31,38 +37,38 @@ var book = {
         document.getElementById('getBook').onclick = this.findBook.bind(this);
    },
     addBookTemplate: `
-    <div id="book" class="bookAuth">
-        <div class="bookForm">
-            <button id="backBtn">BACK</button>
-            <div class="spinner" id="spinner"></div>
-            <h3>Create New Book</h3>
-            <div>
-                <label for="isbn">ISBN</label>
-                <input type="text" placeholder="isbn No." id="isbnField" name="isbn">
-            </div>
-            <div>
-                <label for="title">Title</label>
-                <input placeholder="Book title" name="title">
-            </div>
-            <div>
-                <label for="author">Author</label>
-                <input placeholder="Book author" name="author">
-            </div>
-            <div>
-                <label for="publish_date">Published Date</label>
-                <input type="date" name="publish_date">
-            </div>
-            <div>
-                <label for="publisher">Publisher</label>
-                <input placeholder="Book publisher" name="publisher">
-            </div>
-            <div>
-                <label for="numOfPages">Number Of Pages</label>
-                <input type="number"  id="pgsField" placeholder="Number of pages" name="numOfPages">
-                <button class="button" id="createBook">Create Book</button>
+        <div id="book" class="bookAuth">
+            <div class="bookForm">
+                <button id="backBtn" class="button">BACK</button>
+                <div class="spinner" id="spinner"></div>
+                <h3>Create New Book</h3>
+                <div>
+                    <label for="isbn">ISBN</label>
+                    <input type="text" placeholder="isbn No." id="isbnField" name="isbn">
+                </div>
+                <div>
+                    <label for="title">Title</label>
+                    <input placeholder="Book title" name="title">
+                </div>
+                <div>
+                    <label for="author">Author</label>
+                    <input placeholder="Book author" name="author">
+                </div>
+                <div>
+                    <label for="publish_date">Published Date</label>
+                    <input type="date" name="publish_date">
+                </div>
+                <div>
+                    <label for="publisher">Publisher</label>
+                    <input placeholder="Book publisher" name="publisher">
+                </div>
+                <div>
+                    <label for="numOfPages">Number Of Pages</label>
+                    <input type="number"  id="pgsField" placeholder="Number of pages" name="numOfPages">
+                    <button class="button" id="createBook">Create Book</button>
+                </div>
             </div>
         </div>
-    </div>
     `.trim(),
     showAddBook: function () {
         document.getElementById(this.containerId).innerHTML = this.addBookTemplate;
@@ -70,6 +76,7 @@ var book = {
         document.getElementById('backBtn').onclick = this.showBookPage.bind(this);
     },
     createBook: function() {
+        app.testProtected();
         user.showSpinner();
         var book = {
             "isbn": document.querySelector('[name="isbn"]').value,
@@ -192,43 +199,64 @@ var book = {
     </div>
     `.trim(),
     showBookFound: function() {
-       // document.getElementById('findByIsbn').style.display = "none";
+        // document.getElementById('findByIsbn').style.display = "none";
+        user.hideError();
         document.getElementById(this.containerId).innerHTML = this.bookFoundTemplate;
         document.getElementById('backBtn').onclick = this.showBookPage.bind(this);
         document.getElementById('deleteBook').onclick = this.deletePrompt.bind(this);
         document.getElementById('editBookBtn').onclick = this.showEditBook.bind(this);
-        user.exitAuthAndMsg("Book found!");
     },
     findBook: function() {
         user.showSpinner();
         var isbn = document.querySelector('[name="isbn-get"]').value;
-        
+        if (isbn.length < 1) {
+            user.hideSpinner();
+            user.showError("ISBN field can't be empty!");
+            return;
+        }
         console.log(isbn);
+    //    user.hideError();
 
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
-            if (this.readyState==4 && this.status==200) {
-                var res = JSON.parse(xhttp.responseText);
-                console.log(xhttp.response);
-                book.showBookFound();
-                user.hideSpinner();
-                document.getElementById('isbn').innerHTML = res.isbn;
-                document.getElementById('title').innerHTML = res.title;
-                document.getElementById('author').innerHTML = res.author;
-                document.getElementById('publish_date').innerHTML = res.publish_date.substring(0,10);
-                document.getElementById('publisher').innerHTML = res.publisher;
-                document.getElementById('numOfPages').innerHTML = res.numOfPages;
-                if (book.showEditBook) {
-                    document.querySelector('[name="isbn"]').value = res.isbn;
-                    document.querySelector('[name="title"]').value = res.title;
-                    document.querySelector('[name="author"]').value = res.author;
-                    console.log(res.publish_date.substring(0,10));
-                    document.querySelector('[name="publish_date"]').value = res.publish_date.substring(0,10);
-                    document.querySelector('[name="publisher"]').value = res.publisher;
-                    document.querySelector('[name="numOfPages"]').value = res.numOfPages;  
+            if (xhttp.readyState == 4) {
+                //user.hideSpinner();
+                switch (xhttp.status) {
+                    case 200:
+                        var res = JSON.parse(xhttp.responseText);
+                        console.log(xhttp.response);
+                        book.showBookFound();
+                        user.hideSpinner();
+                        document.getElementById('isbn').innerHTML = res.isbn;
+                        document.getElementById('title').innerHTML = res.title;
+                        document.getElementById('author').innerHTML = res.author;
+                        document.getElementById('publish_date').innerHTML = res.publish_date.substring(0,10);
+                        document.getElementById('publisher').innerHTML = res.publisher;
+                        document.getElementById('numOfPages').innerHTML = res.numOfPages;
+
+                        if (book.showEditBook) {
+                            document.querySelector('[name="isbn"]').value = res.isbn;
+                            document.querySelector('[name="title"]').value = res.title;
+                            document.querySelector('[name="author"]').value = res.author;
+                            console.log(res.publish_date.substring(0,10));
+                            document.querySelector('[name="publish_date"]').value = res.publish_date.substring(0,10);
+                            document.querySelector('[name="publisher"]').value = res.publisher;
+                            document.querySelector('[name="numOfPages"]').value = res.numOfPages;  
+                        }
+                        break;
+                    case 403:
+                        var res = JSON.parse(xhttp.responseText);
+                        user.showError(res.message);
+                        console.log("book Not found!");
+                        user.hideSpinner();
+                        break;
+                    default:
+                    console.log('unknown error');
+                    user.showError("Unknown Error Occured. Server response not received. Try again later.");
+                    }
                 }
-            } 
-        }
+            }
+        
         xhttp.open("GET", this.apiServer + "/book/" + isbn, true);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhttp.send();
@@ -243,6 +271,7 @@ var book = {
         }
     },
     deleteBook: function() {
+        app.testProtected();
         var isbn = document.getElementById('isbn').innerHTML;
         console.log(isbn);
 
@@ -282,6 +311,7 @@ var book = {
         document.getElementById('bookFoundPg').style.display = "block";
     },
     saveEditBook: function() {
+        app.testProtected();
         user.showSpinner();
         var book = {
             "isbn": document.querySelector('[name="isbn"]').value,
@@ -297,7 +327,6 @@ var book = {
             if (this.readyState==4 && this.status==200) {
                 console.log(xhttp.responseText);
                 user.hideSpinner();
-                user.exitAuthAndMsg('Book edited successfully!');
             }
         };
         xhttp.open("PUT", this.apiServer + "/book/" + document.querySelector('[name="isbn"]').value, true);
