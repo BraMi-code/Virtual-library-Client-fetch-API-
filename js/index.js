@@ -33,9 +33,22 @@ var app = {
     // Update DOM on a Received Event
     receivedEvent: function(id) {
         console.log("Recieved event: " + id);
-        user.showLogin();
+        this.showSplashScreen();
+        setTimeout(function() { 
+            app.testProtected();
+            user.secSinceEpoch();
+        }, 
+        5000);
        // document.getElementById('testProtectedButton').onclick = this.testProtected;
        // user.init('userAuth');
+    },
+    splashTemplate: `
+            <div id="splash" class="splashScreen">
+            </div>
+            `
+        .trim(),
+    showSplashScreen: function() {
+        document.getElementById("splash").innerHTML = this.splashTemplate;   
     },
     testProtected: function() {
         const xhttp = new XMLHttpRequest();
@@ -64,7 +77,6 @@ var app = {
         };
         xhttp.onerror = function (err) {
             var authContainer = document.getElementById('userAuth');
-
             authContainer.innerHTML = '<div id="snackbar">Service possibly down.</div>';
             var snackbarElement = document.getElementById("snackbar");
             snackbarElement.className = "show";
@@ -74,7 +86,7 @@ var app = {
             console.log(err);
         };
         
-        xhttp.open("GET", API_URL + "/test-protected", true);
+        xhttp.open("GET", API_SERVER + "/test-protected", true);
         xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
         xhttp.send();
         }
