@@ -44,6 +44,18 @@ body {
     width: 50%;
 }
 
+.splashScreen {
+    background: url('../img/lib.jpeg') center center fixed no-repeat;
+    /* Currently Firefox requires background-size declared separately or the background image will be blank */
+    background-size: cover;
+   /* z-index: 10;*/
+    position: fixed;;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
+
 .userAuth {
     z-index: 10;
     position: fixed;;
