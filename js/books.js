@@ -65,8 +65,11 @@ var book = {
                 <div>
                     <label for="numOfPages">Number Of Pages</label>
                     <input type="number"  id="pgsField" placeholder="Number of pages" name="numOfPages">
-                    <button class="button" id="createBook">Create Book</button>
                 </div>
+                <div>
+                    <input type='file' name="book_img">
+                </div>
+                <button class="button" id="createBook">Create Book</button>
             </div>
         </div>
     `.trim(),
@@ -75,32 +78,34 @@ var book = {
         document.getElementById('createBook').onclick = this.createBook.bind(this);
         document.getElementById('backBtn').onclick = this.showBookPage.bind(this);
     },
+
     createBook: function() {
-        app.testProtected();
+        var form = new FormData();
+        var img =
+        document.querySelector('[name="book_img"]').files[0];
+        console.log(img.name, img.size, img.type);
+        form.append('book_img', img);
+        form.append('isbn', document.querySelector('[name="isbn"]').value);
+        form.append('title', document.querySelector('[name="title"]').value);
+        form.append('author', document.querySelector('[name="author"]').value);
+        form.append('publish_date', document.querySelector('[name="publish_date"]').value);
+        form.append('publisher', document.querySelector('[name="publisher"]').value);
+        form.append('numOfPages', document.querySelector('[name="numOfPages"]').value);
         user.showSpinner();
-        var book = {
-            "isbn": document.querySelector('[name="isbn"]').value,
-            "title": document.querySelector('[name="title"]').value,
-            "author": document.querySelector('[name="author"]').value,
-            "publish_date": document.querySelector('[name="publish_date"]').value,
-            "publisher": document.querySelector('[name="publisher"]').value,
-            "numOfPages": document.querySelector('[name="numOfPages"]').value
-        };
-        console.log(book);
+
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState==4 && this.status==200) {
                 console.log(xhttp.responseText);
+                var res = xhttp.response;
                 user.exitAuthAndMsg("Book created!");
                 user.hideSpinner();
-                /* book.showBookPage; Ovdje bih ubacila i bind,
-                 ali ne kontam kakvu ulogu ima.
-                 Htjela bih da me vrati na pocetnu kada se knjiga sacuva u bazi */
             }
         };
         xhttp.open("POST", this.apiServer + "/book", true);
-        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhttp.send(JSON.stringify(book));
+       // xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+       // xhttp.send(JSON.stringify(book));
+       xhttp.send(form);
     },
     allBooksTemplate: `
     <div id="book" class="bookAuth">
@@ -158,6 +163,7 @@ var book = {
                     PUBLISH DATE: <p id="publish_date" class="book-info"></p>
                     PUBLISHER: <p id="publisher" class="book-info"></p>
                     NUMBER OF PAGES: <p id="numOfPages" class="book-info"></p>
+                    <img id="bookImg" class="book-info">
                 </div>
                 <div class="deleteBook">
                     <button id="deleteBook" class="button">Delete Book</button>
@@ -191,7 +197,10 @@ var book = {
                 <div>
                     <label for="numOfPages">Number Of Pages</label>
                     <input type="number" placeholder="Number of pages" name="numOfPages"  id="pgsField">
-                 </div>
+                </div>
+                <div>
+                <input type='file' name="book_img">
+                </div>
                 <button class="button" id="saveEdit">Save Edit</button>
                 <button class="cancelEdit" id="cancelEdit">Cancel</button>
             </div>
@@ -216,24 +225,26 @@ var book = {
         }
         console.log(isbn);
     //    user.hideError();
-
+        var imgPath = book.apiServer + '/uploads/';
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState == 4) {
-                //user.hideSpinner();
+                // user.hideSpinner();
                 switch (xhttp.status) {
                     case 200:
                         var res = JSON.parse(xhttp.responseText);
                         console.log(xhttp.response);
                         book.showBookFound();
                         user.hideSpinner();
+                        console.log(res.book_img);
+                        console.log(imgPath + res.book_img);
+                        document.getElementById('bookImg').src = res.book_img;
                         document.getElementById('isbn').innerHTML = res.isbn;
                         document.getElementById('title').innerHTML = res.title;
                         document.getElementById('author').innerHTML = res.author;
                         document.getElementById('publish_date').innerHTML = res.publish_date.substring(0,10);
                         document.getElementById('publisher').innerHTML = res.publisher;
                         document.getElementById('numOfPages').innerHTML = res.numOfPages;
-
                         if (book.showEditBook) {
                             document.querySelector('[name="isbn"]').value = res.isbn;
                             document.querySelector('[name="title"]').value = res.title;
@@ -271,7 +282,6 @@ var book = {
         }
     },
     deleteBook: function() {
-        app.testProtected();
         var isbn = document.getElementById('isbn').innerHTML;
         console.log(isbn);
 
@@ -311,7 +321,6 @@ var book = {
         document.getElementById('bookFoundPg').style.display = "block";
     },
     saveEditBook: function() {
-        app.testProtected();
         user.showSpinner();
         var book = {
             "isbn": document.querySelector('[name="isbn"]').value,
