@@ -233,6 +233,8 @@ var book = {
                 switch (xhttp.status) {
                     case 200:
                         var res = JSON.parse(xhttp.responseText);
+                        var src = imgPath + res.book_img;
+                        console.log(src);
                         console.log(xhttp.response);
                         book.showBookFound();
                         user.hideSpinner();
