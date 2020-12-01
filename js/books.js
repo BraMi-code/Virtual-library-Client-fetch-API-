@@ -240,7 +240,7 @@ var book = {
                         user.hideSpinner();
                         console.log(res.book_img);
                         console.log(imgPath + res.book_img);
-                        document.getElementById('bookImg').src = res.book_img;
+                        document.getElementById('bookImg').src = src;
                         document.getElementById('isbn').innerHTML = res.isbn;
                         document.getElementById('title').innerHTML = res.title;
                         document.getElementById('author').innerHTML = res.author;
