@@ -35,6 +35,7 @@ var app = {
         console.log("Recieved event: " + id);
         this.showSplashScreen();
         setTimeout(function() { 
+            app.hideSplashScreen();
             app.testProtected();
             user.secSinceEpoch();
         }, 
@@ -49,6 +50,9 @@ var app = {
         .trim(),
     showSplashScreen: function() {
         document.getElementById("splash").innerHTML = this.splashTemplate;   
+    },
+    hideSplashScreen: function() {
+        document.getElementById("splash").style.display = "none";   
     },
     testProtected: function() {
         const xhttp = new XMLHttpRequest();

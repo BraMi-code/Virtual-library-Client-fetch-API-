@@ -39,6 +39,7 @@ body {
 
 /* Portrait layout (default) */
 
+
 .app {
     margin: auto;
     width: 50%;
@@ -188,6 +189,14 @@ body {
 
 .inputFind {
     display: none;
+}
+
+input[type="file"].hideInput {
+    display: none;
+}
+  
+img {
+    cursor: pointer;
 }
 
 .editBookPage {
