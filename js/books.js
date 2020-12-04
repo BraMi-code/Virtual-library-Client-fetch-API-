@@ -378,7 +378,7 @@ var book = {
                     user.hideSpinner();
                 }
             };
-            xhttp.open("POST", this.apiServer + "/book/" + document.querySelector('[name="isbn"]').value, true);
+            xhttp.open("PUT", this.apiServer + "/book/" + document.getElementById('isbn').innerText, true);
             //xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
            // xhttp.send(JSON.stringify(book));
            xhttp.send(form);
