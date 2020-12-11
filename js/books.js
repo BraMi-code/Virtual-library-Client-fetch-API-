@@ -298,9 +298,13 @@ var book = {
                         user.hideSpinner();
                         user.exitAuthAndMsg('Book deleted');
                         break;
+                    case 401:
+                        console.log("Please login to continue");
+                        user.showLogin();
+                        user.hideSpinner();
+                        break;
                     case 403:
-                        console.log("please login to continue");
-                        document.getElementById('editBookPg').style.display = "none";
+                        console.log("Verification failed");
                         user.showLogin();
                         user.hideSpinner();
                         break;
