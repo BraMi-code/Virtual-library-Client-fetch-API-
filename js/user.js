@@ -186,8 +186,7 @@ var user = {
         snackbarElement.className = "show";
         // After 3 seconds, remove the show class from DIV
         setTimeout(function () { authContainer.innerHTML = '';
-    }, 3000);
-        console.log("Ovdje je iskacuci prozor");
+        }, 3000);
     },
     showError: function (msg) {
         var errorDiv = document.getElementById('error');

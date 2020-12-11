@@ -32,12 +32,12 @@ var book = {
         document.getElementById('getBooks').onclick = this.showAllBooksTemplate.bind(this);
         document.getElementById('getBook').onclick = this.showInput.bind(this);
     },
-    showInput: function(isbn) {
+    showInput: function() {
         document.getElementById('findByIsbn').style.display = "block";
         document.getElementById('getBook').onclick = this.findBook.bind(this);
    },
     addBookTemplate: `
-        <div id="book" class="bookAuth">
+        <div id="book" class="bookAuth center">
             <div class="bookForm">
                 <button id="backBtn" class="button">BACK</button>
                 <div class="spinner" id="spinner"></div>
@@ -69,7 +69,9 @@ var book = {
                 <div>
                     <input type='file' name="book_img">
                 </div>
-                <button class="button" id="createBook">Create Book</button>
+                <div>
+                    <button id="createBook">Create Book</button>
+                </div>
             </div>
         </div>
     `.trim(),
@@ -90,6 +92,9 @@ var book = {
         form.append('publish_date', document.querySelector('[name="publish_date"]').value);
         form.append('publisher', document.querySelector('[name="publisher"]').value);
         form.append('numOfPages', document.querySelector('[name="numOfPages"]').value);
+
+        user.secSinceEpoch();
+        app.testProtected();
         user.showSpinner();
 
         const xhttp = new XMLHttpRequest();
@@ -102,12 +107,13 @@ var book = {
             }
         };
         xhttp.open("POST", this.apiServer + "/book", true);
+        xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
        // xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
        // xhttp.send(JSON.stringify(book));
        xhttp.send(form);
     },
     allBooksTemplate: `
-        <div id="book" class="bookAuth">
+        <div id="book" class="bookAuth center" >
             <div class="bookForm" id="bookP">
                 <button id="backBtn">BACK</button>
                 <!--- Book List Goes Here -->
@@ -148,8 +154,8 @@ var book = {
         xhttp.send();
     },
     bookFoundTemplate: `
-        <div id="book" class="bookAuth">
-            <div class="bookForm" id="bookFound">
+        <div id="book" class="bookAuth center" >
+            <div class id="bookFound">
                 ISBN: <p id="isbn" class="book-info"></p>
                 <div id="bookFoundPg" class="findBookPage">
                     <button id="backBtn">BACK</button><br>
@@ -206,7 +212,7 @@ var book = {
                 </div>
             </div>
         </div>
-        `.trim(),
+    `.trim(),
     showBookFound: function() {
         user.hideError();
         document.getElementById(this.containerId).innerHTML = this.bookFoundTemplate;
@@ -227,7 +233,6 @@ var book = {
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState == 4) {
-                // user.hideSpinner();
                 switch (xhttp.status) {
                     case 200:
                         var res = JSON.parse(xhttp.responseText);
@@ -249,7 +254,7 @@ var book = {
                     case 403:
                         var res = JSON.parse(xhttp.responseText);
                         user.showError(res.message);
-                        console.log("book Not found!");
+                        console.log("Book not found!");
                         user.hideSpinner();
                         break;
                     default:
@@ -273,23 +278,41 @@ var book = {
         }
     },
     deleteBook: function() {
+        user.showSpinner();
         var isbn = document.getElementById('isbn').innerHTML;
         console.log(isbn);
 
         var book =  {
             'isbn': isbn
         }
+        user.secSinceEpoch();
+        app.testProtected();
         console.log(JSON.stringify(book));
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
-            if (this.readyState==4 && this.status==200) {
-                console.log(xhttp.responseText);
-                user.hideSpinner();
-                user.exitAuthAndMsg('Book deleted');
-            }
+          
+            if (xhttp.readyState == 4) {
+                switch (xhttp.status) {
+                    case 200:
+                        console.log(xhttp.response);
+                        user.hideSpinner();
+                        user.exitAuthAndMsg('Book deleted');
+                        break;
+                    case 403:
+                        console.log("please login to continue");
+                        document.getElementById('editBookPg').style.display = "none";
+                        user.showLogin();
+                        user.hideSpinner();
+                        break;
+                    default:
+                    console.log('unknown error');
+                    user.showError("Unknown Error Occured. Server response not received. Try again later.");
+                    }
+                }
         }
         xhttp.open("DELETE", this.apiServer + "/book/" + isbn, true);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
         xhttp.send();
     },
     showEditBook: function() {
@@ -310,8 +333,6 @@ var book = {
                 var res = JSON.parse(xhttp.responseText);
                 var src = imgPath + res.book_img;
                 console.log(src);
-                console.log(res.book_img);
-                console.log(imgPath + res.book_img);
                 document.querySelector('[name="img"]').src = src;
                 document.querySelector('[name="isbn"]').value = res.isbn;
                 document.querySelector('[name="title"]').value = res.title;
@@ -331,26 +352,6 @@ var book = {
         document.getElementById('bookFoundPg').style.display = "block";
     },
     saveEditBook: function() {
-        /* var book = {
-            "isbn": document.querySelector('[name="isbn"]').value,
-            "title": document.querySelector('[name="title"]').value,
-            "author": document.querySelector('[name="author"]').value,
-            "publish_date": document.querySelector('[name="publish_date"]').value,
-            "publisher": document.querySelector('[name="publisher"]').value,
-            "numOfPages": document.querySelector('[name="numOfPages"]').value,
-            "book_img": document.querySelector('[name="numOfPages"]').value
-        };
-        console.log(book);
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState==4 && this.status==200) {
-                console.log(xhttp.responseText);
-                user.hideSpinner();
-            }
-        };
-        xhttp.open("PUT", this.apiServer + "/book/" + document.querySelector('[name="isbn"]').value, true);
-        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhttp.send(JSON.stringify(book)); */
         var imgPath = book.apiServer + "/";
 
         var form = new FormData();
@@ -358,7 +359,7 @@ var book = {
         console.log(img);
         if (img.files.length > 0 ) {
             // add img to FormData
-            console.log("adding image")
+            console.log("adding image");
             form.append('book_img', img.files[0]);
         }
         console.log(img.files[0].name, img.files[0].size, img.files[0].type);
@@ -369,16 +370,36 @@ var book = {
         form.append('publish_date', document.querySelector('[name="publish_date"]').value);
         form.append('publisher', document.querySelector('[name="publisher"]').value);
         form.append('numOfPages', document.querySelector('[name="numOfPages"]').value);
-   
+        user.secSinceEpoch();
+        app.testProtected();
         user.showSpinner();
             const xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
-                if (this.readyState==4 && this.status==200) {
+              /*  if (this.readyState==4 && this.status==200) {
                     console.log(xhttp.responseText);
                     user.hideSpinner();
-                }
+                }*/
+                if (xhttp.readyState == 4) {
+                    switch (xhttp.status) {
+                        case 200:
+                            console.log(xhttp.response);
+                            user.hideSpinner();
+                            user.exitAuthAndMsg('Book edited');
+                            break;
+                        case 403:
+                            console.log("please login to continue");
+                            book.backToFound();
+                            user.showLogin();
+                            user.hideSpinner();
+                            break;
+                        default:
+                        console.log('unknown error');
+                        user.showError("Unknown Error Occured. Server response not received. Try again later.");
+                        }
+                    }
             };
             xhttp.open("PUT", this.apiServer + "/book/" + document.getElementById('isbn').innerText, true);
+            xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
             //xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
            // xhttp.send(JSON.stringify(book));
            xhttp.send(form);
