@@ -81,6 +81,12 @@ var book = {
         document.getElementById('backBtn').onclick = this.showBookPage.bind(this);
     },
     createBook: function() {
+        if (!user.isLoggedIn()) {
+            user.showLogin();
+            return;
+        }
+        user.showSpinner();
+
         var form = new FormData();
         var img =
         document.querySelector('[name="book_img"]').files[0];
@@ -92,10 +98,6 @@ var book = {
         form.append('publish_date', document.querySelector('[name="publish_date"]').value);
         form.append('publisher', document.querySelector('[name="publisher"]').value);
         form.append('numOfPages', document.querySelector('[name="numOfPages"]').value);
-
-        user.secSinceEpoch();
-        app.testProtected();
-        user.showSpinner();
 
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
@@ -177,7 +179,7 @@ var book = {
                         <button id="editBookBtn" class="button">Edit Book</button>
                     </div>
                 </div>
-        
+
                 <div id="editBookPg" class="editBookPage">
                     <div>
                         <label for="isbn">ISBN</label>
@@ -212,6 +214,7 @@ var book = {
                 </div>
             </div>
         </div>
+
     `.trim(),
     showBookFound: function() {
         user.hideError();
@@ -278,6 +281,12 @@ var book = {
         }
     },
     deleteBook: function() {
+        console.log(user.isLoggedIn());
+        if (!user.isLoggedIn()) {
+            user.hideSpinner();
+            user.showLogin();
+            return;
+        }
         user.showSpinner();
         var isbn = document.getElementById('isbn').innerHTML;
         console.log(isbn);
@@ -285,37 +294,18 @@ var book = {
         var book =  {
             'isbn': isbn
         }
-        user.secSinceEpoch();
-        app.testProtected();
+       
         console.log(JSON.stringify(book));
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
-          
-            if (xhttp.readyState == 4) {
-                switch (xhttp.status) {
-                    case 200:
-                        console.log(xhttp.response);
-                        user.hideSpinner();
-                        user.exitAuthAndMsg('Book deleted');
-                        break;
-                    case 401:
-                        console.log("Please login to continue");
-                        user.showLogin();
-                        user.hideSpinner();
-                        break;
-                    case 403:
-                        console.log("Verification failed");
-                        user.showLogin();
-                        user.hideSpinner();
-                        break;
-                    default:
-                    console.log('unknown error');
-                    user.showError("Unknown Error Occured. Server response not received. Try again later.");
-                    }
-                }
+            if (this.readyState==4 && this.status==200) {
+                console.log(xhttp.responseText);
+                user.hideSpinner();
+                user.exitAuthAndMsg("Book deleted");
+            }
         }
         xhttp.open("DELETE", this.apiServer + "/book/" + isbn, true);
-        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        // xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
         xhttp.send();
     },
@@ -356,8 +346,13 @@ var book = {
         document.getElementById('bookFoundPg').style.display = "block";
     },
     saveEditBook: function() {
-        var imgPath = book.apiServer + "/";
+        if (!user.isLoggedIn()) {
+            user.showLogin();
+            return;
+        }
+        user.showSpinner();
 
+        var imgPath = book.apiServer + "/";
         var form = new FormData();
         var img = document.querySelector('[name="book_img"]');
         console.log(img);
@@ -374,15 +369,9 @@ var book = {
         form.append('publish_date', document.querySelector('[name="publish_date"]').value);
         form.append('publisher', document.querySelector('[name="publisher"]').value);
         form.append('numOfPages', document.querySelector('[name="numOfPages"]').value);
-        user.secSinceEpoch();
-        app.testProtected();
-        user.showSpinner();
-            const xhttp = new XMLHttpRequest();
+
+        const xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
-              /*  if (this.readyState==4 && this.status==200) {
-                    console.log(xhttp.responseText);
-                    user.hideSpinner();
-                }*/
                 if (xhttp.readyState == 4) {
                     switch (xhttp.status) {
                         case 200:

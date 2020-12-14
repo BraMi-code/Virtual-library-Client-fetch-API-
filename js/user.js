@@ -222,8 +222,12 @@ var user = {
     
         return JSON.parse(jsonPayload);
     },
-    secSinceEpoch: function() {
+    isLoggedIn: function() {
         var token = this.getToken();
+        if (token == '') {
+            console.log('no token');
+            return false;
+        }
         var payload = this.parseJwt(token);
         console.log(payload.exp);
         var date = new Date();
@@ -231,11 +235,13 @@ var user = {
         console.log(seconds);
         if (payload.exp > seconds) {
             console.log("Not expired!");
-            book.showBookPage();
+            return true;
+            // book.showBookPage();
         }
         else {
             console.log("Token expired!");
-            user.showLogin();
+            // user.showLogin();
+            return false;
         }
     }
 };

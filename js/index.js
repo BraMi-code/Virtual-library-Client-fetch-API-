@@ -36,10 +36,14 @@ var app = {
         this.showSplashScreen();
         setTimeout(function() { 
             app.hideSplashScreen();
-            app.testProtected();
-            user.secSinceEpoch();
+            // app.testProtected();
+            if (user.isLoggedIn()) {
+                book.showBookPage();
+            } else {
+                user.showLogin();
+            }
         }, 
-        5000);
+        3000);
        // document.getElementById('testProtectedButton').onclick = this.testProtected;
        // user.init('userAuth');
     },
@@ -54,7 +58,7 @@ var app = {
     hideSplashScreen: function() {
         document.getElementById("splash").style.display = "none";   
     },
-    testProtected: function() {
+    /*testProtected: function() {
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState==4) {
@@ -93,7 +97,7 @@ var app = {
         xhttp.open("GET", API_SERVER + "/test-protected", true);
         xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
         xhttp.send();
-        }
+        } */
     };
     
 app.initialize();
