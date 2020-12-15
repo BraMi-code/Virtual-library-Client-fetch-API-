@@ -48,56 +48,14 @@ var app = {
        // user.init('userAuth');
     },
     splashTemplate: `
-            <div id="splash" class="splashScreen">
-            </div>
-            `
-        .trim(),
+            <div id="splash" class="splashScreen"></div>
+            `.trim(),
     showSplashScreen: function() {
         document.getElementById("splash").innerHTML = this.splashTemplate;   
     },
     hideSplashScreen: function() {
         document.getElementById("splash").style.display = "none";   
-    },
-    /*testProtected: function() {
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState==4) {
-                switch (this.status) {
-                    case 200: 
-                        var res = JSON.parse(xhttp.responseText);
-                        console.log(res.message);
-                        break;
-                    case 401: 
-                        var res = JSON.parse(xhttp.responseText);
-                        console.log(res.message);
-                        user.showLogin('Please log in to access protected route.');
-                        break;
-                    case 403: 
-                        var res = JSON.parse(xhttp.responseText);
-                        console.log(res.message);
-                        user.showLogin('Please log in to access protected route.');
-                        break;
-                    default:
-                        // unhandled error
-                        console.log("Unhandled error");
-                }
-            }
-        };
-        xhttp.onerror = function (err) {
-            var authContainer = document.getElementById('userAuth');
-            authContainer.innerHTML = '<div id="snackbar">Service possibly down.</div>';
-            var snackbarElement = document.getElementById("snackbar");
-            snackbarElement.className = "show";
-
-            // After 3 seconds, remove the show class from DIV
-            setTimeout(function () { authContainer.innerHTML = '';}, 3000);
-            console.log(err);
-        };
-        
-        xhttp.open("GET", API_SERVER + "/test-protected", true);
-        xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
-        xhttp.send();
-        } */
-    };
+    }
+};
     
 app.initialize();

@@ -57,7 +57,7 @@ body {
 
 .userAuth {
     z-index: 10;
-    position: fixed;;
+    position: absolute;
     top: 0;
     bottom: 0;
     right: 0;
@@ -65,34 +65,21 @@ body {
     background-color: white;
 }
 
-.userForm {
-    position: fixed;
+.userForm, .bookForm {
     width: 80%;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
-.bookAuth {
-    z-index: 10;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    background-color: white;
-}
+.userForm {
+    position: fixed;
+} 
 
 .bookForm {
     position: absolute;
-    width: 80%;
-    top: 70%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-} 
-.center {
     text-align: center;
-}
+} 
 
 .error {
     display: none;
