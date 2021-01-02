@@ -231,44 +231,46 @@ var book = {
             return;
         }
         console.log(isbn);
-        var imgPath = book.apiServer + "/";
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (xhttp.readyState == 4) {
-                switch (xhttp.status) {
-                    case 200:
-                        var res = JSON.parse(xhttp.responseText);
-                        var src = imgPath + res.book_img;
-                        console.log(src);
-                        console.log(xhttp.response);
-                        book.showBookFound();
-                        user.hideSpinner();
-                        console.log(res.book_img);
-                        console.log(imgPath + res.book_img);
-                        document.getElementById('bookImg').src = src;
-                        document.getElementById('isbn').innerHTML = res.isbn;
-                        document.getElementById('title').innerHTML = res.title;
-                        document.getElementById('author').innerHTML = res.author;
-                        document.getElementById('publish_date').innerHTML = res.publish_date.substring(0,10);
-                        document.getElementById('publisher').innerHTML = res.publisher;
-                        document.getElementById('numOfPages').innerHTML = res.numOfPages;
-                        break;
+        var url = this.apiServer + "/book/" + isbn;
+
+        fetch(url, {
+            method: 'GET', 
+            headers: new Headers({ 
+                "Content-Type": "application/json;charset=UTF-8" 
+            })
+        }).then(function(response) {
+            if (response.status !== 200) {
+                switch(response.status) {
                     case 403:
-                        var res = JSON.parse(xhttp.responseText);
-                        user.showError(res.message);
+                        user.showError("Book not found");
                         console.log("Book not found!");
                         user.hideSpinner();
                         break;
-                    default:
+                    default: 
                     console.log('unknown error');
-                    user.showError("Unknown Error Occured. Server response not received. Try again later.");
-                    }
+                        user.showError("Unknown Error Occured. Server response not received. Try again later.");
                 }
+                return;
             }
-        
-        xhttp.open("GET", this.apiServer + "/book/" + isbn, true);
-        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhttp.send();
+            response.json().then(function (data) {
+                console.log(data); 
+                var imgPath = book.apiServer + "/";
+                user.hideSpinner();
+                book.showBookFound();
+                console.log(data.book_img);
+                console.log(imgPath + data.book_img);
+                var src = imgPath + data.book_img;
+                document.getElementById('bookImg').src = src;
+                document.getElementById('isbn').innerHTML = data.isbn;
+                document.getElementById('title').innerHTML = data.title;
+                document.getElementById('author').innerHTML = data.author;
+                document.getElementById('publish_date').innerHTML = data.publish_date.substring(0,10);
+                document.getElementById('publisher').innerHTML = data.publisher;
+                document.getElementById('numOfPages').innerHTML = data.numOfPages;
+            })
+        }).catch(function(err) {
+                console.log('Fetch Error :-S', err);
+            });
     },
     deletePrompt: function() {
         var isbn = document.getElementById('isbn').innerHTML;
@@ -315,7 +317,7 @@ var book = {
             console.log('Fetch Error :-S', err);
         });
     },
-    showEditBook: function(event) {
+    showEditBook: function() {
         document.getElementById('bookFoundPg').style.display = "none";
         document.getElementById('editBookPg').style.display = "block";
         document.getElementById('cancelEdit').onclick = this.backToFound.bind(this);
@@ -324,32 +326,40 @@ var book = {
         var isbnGet = document.getElementById("isbn");
         console.log(isbnGet.innerText);
 
-        var imgPath = book.apiServer + "/";
+        var url = this.apiServer + "/book/" + isbnGet.innerText;
 
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState==4 && this.status==200) {
-                console.log(xhttp.responseText);
-                var img = document.querySelector('[name="book_img"]');
-                var res = JSON.parse(xhttp.responseText);
-                var src = imgPath + res.book_img;
-               // img.src = src;
-                // img.name = res.book_img;
-               // console.log(img.name, img.size, img.type);   
-               document.querySelector('[name="book_img"]').src = src;      
-             //  document.querySelector('[name="img"]').src = src;   
-                document.querySelector('[name="isbn"]').value = res.isbn;
-                document.querySelector('[name="title"]').value = res.title;
-                document.querySelector('[name="author"]').value = res.author;
-                console.log(res.publish_date.substring(0,10));
-                document.querySelector('[name="publish_date"]').value = res.publish_date.substring(0,10);
-                document.querySelector('[name="publisher"]').value = res.publisher;
-                document.querySelector('[name="numOfPages"]').value = res.numOfPages;
+        fetch(url, {
+            method: 'GET', 
+            headers: new Headers({
+                "Content-Type": "application/json;charset=UTF-8"
+            })
+         }).then(function(response) {
+            if (response.status !== 200) {
+                console.log('Looks like there was a problem. Status Code: ' + response.status);
+                return;
             }
-        }
-            xhttp.open("GET", this.apiServer + "/book/" + isbnGet.innerText, true);
-            xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhttp.send();
+            response.json().then(function (data) {
+                console.log(data);
+                var imgPath = book.apiServer + "/";
+
+                var img = document.querySelector('[name="book_img"]');
+                var src = imgPath + data.book_img;
+                console.log(src);
+                img.src = src;
+                img.name = data.book_img;
+                console.log(img.name, img.size, img.type);
+               
+                document.querySelector('[name="isbn"]').value = data.isbn;
+                document.querySelector('[name="title"]').value = data.title;
+                document.querySelector('[name="author"]').value = data.author;
+                console.log(data.publish_date.substring(0,10));
+                document.querySelector('[name="publish_date"]').value = data.publish_date.substring(0,10);
+                document.querySelector('[name="publisher"]').value = data.publisher;
+                document.querySelector('[name="numOfPages"]').value = data.numOfPages;
+            }) .catch(function(err) {
+                console.log('Fetch Error :-S', err);
+            });
+        })     
     },
     backToFound: function() {
         document.getElementById('editBookPg').style.display = "none";
