@@ -281,6 +281,7 @@ var book = {
     },
     deleteBook: function() {
         console.log(user.isLoggedIn());
+
         if (!user.isLoggedIn()) {
             document.getElementById('bookFoundPg').style.display = "none";
             user.hideSpinner();
@@ -288,27 +289,31 @@ var book = {
             user.showError('You must be logged in');
             return;
         }
+
         user.showSpinner();
         var isbn = document.getElementById('isbn').innerHTML;
         console.log(isbn);
+        var url = this.apiServer + "/book/" + isbn;
 
-        var book =  {
-            'isbn': isbn
-        }
-        console.log(JSON.stringify(book));
-
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState==4 && this.status==200) {
-                console.log(xhttp.responseText);
+        fetch(url, {
+            method: 'DELETE', 
+            headers: new Headers({ 
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer: " + user.getToken() })
+        }).then(function(response) {
+            if (response.status !== 200) {
+                console.log('Looks like there was a problem. Status Code: ' + response.status);
+                return;
+            }
+            response.json().then(function (data) {
+                console.log(data); 
                 user.hideSpinner();
                 user.exitAuthAndMsg("Book deleted");
-            }
-        }
-        xhttp.open("DELETE", this.apiServer + "/book/" + isbn, true);
-        // xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
-        xhttp.send();
+            })
+        })
+        .catch(function(err) {
+            console.log('Fetch Error :-S', err);
+        });
     },
     showEditBook: function(event) {
         document.getElementById('bookFoundPg').style.display = "none";
