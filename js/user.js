@@ -19,7 +19,6 @@ var user = {
             </div>
         </div>`.trim(),
     showLogin: function (errMsg) {
-        console.log("login template prikazan");
         document.getElementById(this.containerId).innerHTML = this.loginTemplate;
         document.getElementById('loginButton').onclick = this.submitLoginData.bind(this);
         document.getElementById('signUpButton').onclick = this.showSignUp.bind(this);
@@ -147,7 +146,7 @@ var user = {
                         console.log("unknown error");
                         this.showError("Unknown Error Occured. Server response not received. Try again later.");
                 }
-                user.hideSpinner();
+                this.hideSpinner();
             }
         }.bind(this);
 

@@ -191,3 +191,8 @@ img {
 .findBookPage {
     display: block;
 }
+
+.logoutIcon {
+    width: 25px;
+    height: 25px;
+}

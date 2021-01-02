@@ -12,13 +12,14 @@ var book = {
                 <button id="getBooks" class="button">Get Books</button>
             </div>
             <div class="getBook">
-                <button id="getBook" class="button">Find A Book</button>
                 <div id="findByIsbn" class="inputFind">
                     <input placeholder="ISBN" name="isbn-get">
                 </div>
+                <button id="getBook" class="button">Find A Book</button>
+              
             </div>
             <div>
-                <button id="logoutBtn">LOGOUT</button>
+                <button id="logoutBtn"><img src="./img/logout.png" alt="logout" class="logoutIcon"></button>
             </div>
         </div>`.trim(),
     showBookPage: function() {
@@ -76,6 +77,7 @@ var book = {
     createBook: function() {
         if (!user.isLoggedIn()) {
             user.showLogin();
+            user.showError('You must be logged in');
             return;
         }
         user.showSpinner();
@@ -131,31 +133,39 @@ var book = {
         this.getBooks();
     },
     getBooks: function() {
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState==4 && this.status==200) {
-                console.log(xhttp.responseText);
-                var res = JSON.parse(xhttp.responseText);
-                var bookList = res.length;
+        var url = this.apiServer + "/books";
+        console.log(url);
+        fetch(url, {
+            method: 'GET'
+        })
+        .then(function(response) {
+              if (response.status !== 200) {
+                console.log('Looks like there was a problem. Status Code: ' + response.status);
+                return;
+              }
+            // Examine the text in the response
+            response.json().then(function(data) {
+            console.log(data);
+            var bookList = data.length;
                 for (i=0; i < bookList; i++) {
-                    document.getElementById('bookList').innerHTML += "<td>" + res[i].isbn + "</td>" + "<td>" + res[i].title + "</td>" + "<td>" + res[i].author + "</td>";
+                    document.getElementById('bookList').innerHTML += "<td>" + data[i].isbn + "</td>" + "<td>" + data[i].title + "</td>" + "<td>" + data[i].author + "</td>";
                 }
-            }
-        };
-        xhttp.open("GET", this.apiServer + "/books", true);
-        xhttp.send();
+            });
+        })
+        .catch(function(err) {
+            console.log('Fetch Error :-S', err);
+        });
     },
     bookFoundTemplate: `
         <div class="bookForm" id="bookFound">
-            <div id="isbn-field" class="isbn-field">
-                ISBN: <p id="isbn"></p>
-            </div>
             <div class="error" id="error"></div>
             <div class="spinner" id="spinner"></div>
-
             <div id="bookFoundPg" class="findBookPage">
                 <button id="backBtn">BACK</button><br>
                 <h3>Book found!</h3>
+                <div id="isbn-field">
+                    ISBN: <p id="isbn"></p>
+                </div>
                 <div id="book-info">
                     TITLE: <p id="title" class="book-info"></p>
                     AUTHOR: <p id="author" class="book-info"></p>
@@ -198,7 +208,7 @@ var book = {
                     <input type="number" placeholder="Number of pages" name="numOfPages"  id="pgsField">
                 </div>
                 <div>
-                    <input type='file' name="book_img">
+                    <input type='file' name="book_img" id="imgInput">
                     <img id="bookImg" class="book-info" name="img">
                 </div>
                 <button class="button" id="saveEdit">Save Edit</button>
@@ -275,6 +285,7 @@ var book = {
             document.getElementById('bookFoundPg').style.display = "none";
             user.hideSpinner();
             user.showLogin();
+            user.showError('You must be logged in');
             return;
         }
         user.showSpinner();
@@ -299,7 +310,7 @@ var book = {
         xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
         xhttp.send();
     },
-    showEditBook: function() {
+    showEditBook: function(event) {
         document.getElementById('bookFoundPg').style.display = "none";
         document.getElementById('editBookPg').style.display = "block";
         document.getElementById('cancelEdit').onclick = this.backToFound.bind(this);
@@ -314,10 +325,14 @@ var book = {
         xhttp.onreadystatechange = function() {
             if (this.readyState==4 && this.status==200) {
                 console.log(xhttp.responseText);
+                var img = document.querySelector('[name="book_img"]');
                 var res = JSON.parse(xhttp.responseText);
                 var src = imgPath + res.book_img;
-                console.log(src);
-                document.querySelector('[name="img"]').src = src;
+               // img.src = src;
+                // img.name = res.book_img;
+               // console.log(img.name, img.size, img.type);   
+               document.querySelector('[name="book_img"]').src = src;      
+             //  document.querySelector('[name="img"]').src = src;   
                 document.querySelector('[name="isbn"]').value = res.isbn;
                 document.querySelector('[name="title"]').value = res.title;
                 document.querySelector('[name="author"]').value = res.author;
@@ -337,10 +352,10 @@ var book = {
     },
     saveEditBook: function() {
         if (!user.isLoggedIn()) {
-            // "You must log in to continue"
-            document.getElementById('editBookPg').style.display = "none";
-            document.getElementById('isbn-field').style.display = "none";
+           // document.getElementById('editBookPg').style.display = "none";
+           // document.getElementById('isbn-field').style.display = "none";
             user.showLogin();
+            user.showError('You must be logged in');
             return;
         }
         user.showSpinner();
@@ -349,6 +364,11 @@ var book = {
         var form = new FormData();
         var img = document.querySelector('[name="book_img"]');
         console.log(img);
+        console.log(img.src);
+        console.log(img.files);
+
+        form.append('book_img', img);
+
         if (img.files.length > 0 ) {
             // add img to FormData
             console.log("adding image");
