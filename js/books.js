@@ -94,20 +94,28 @@ var book = {
         form.append('publisher', document.querySelector('[name="publisher"]').value);
         form.append('numOfPages', document.querySelector('[name="numOfPages"]').value);
 
-        const xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState==4 && this.status==200) {
-                console.log(xhttp.responseText);
-                var res = xhttp.response;
-                user.exitAuthAndMsg("Book created!");
-                user.hideSpinner();
-            }
-        };
-        xhttp.open("POST", this.apiServer + "/book", true);
-        xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
-       // xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-       // xhttp.send(JSON.stringify(book));
-       xhttp.send(form);
+        var url = this.apiServer + "/book";
+
+       fetch(url, {
+        method: 'POST',
+        body: form,
+        headers: new Headers({
+            "Authorization": "Bearer: " + user.getToken()
+            })
+        }).then(function(response) {
+        if (response.status !== 200) {
+            console.log('Looks like there was a problem. Status Code: ' + response.status);
+            return;
+          }
+          response.json().then(function(data) {
+            console.log(data);
+            user.exitAuthAndMsg("Book created!");
+            user.hideSpinner();
+       });
+        })
+        .catch(function(err) {
+            console.log('Fetch Error :-S', err);
+        });
     },
     allBooksTemplate: `
         <div class="bookForm">
@@ -172,7 +180,7 @@ var book = {
                     PUBLISH DATE: <p id="publish_date" class="book-info"></p>
                     PUBLISHER: <p id="publisher" class="book-info"></p>
                     NUMBER OF PAGES: <p id="numOfPages" class="book-info"></p>
-                    <img id="bookImg" class="book-info">
+                    <img id="bookImg" class="book-info" style="width:70px;height:100px;margin-bottom:0px;" src="">
                 </div>
                 <div class="deleteBook">
                     <button id="deleteBook" class="button">Delete Book</button>
@@ -209,7 +217,6 @@ var book = {
                 </div>
                 <div>
                     <input type='file' name="book_img" id="imgInput">
-                    <img id="bookImg" class="book-info" name="img">
                 </div>
                 <button class="button" id="saveEdit">Save Edit</button>
                 <button class="cancelEdit" id="cancelEdit">Cancel</button>
@@ -376,21 +383,34 @@ var book = {
         user.showSpinner();
 
         var imgPath = book.apiServer + "/";
-        var form = new FormData();
-        var img = document.querySelector('[name="book_img"]');
+        var img = document.getElementById('bookImg').src;
         console.log(img);
-        console.log(img.src);
-        console.log(img.files);
+        var imgInput = document.querySelector('[name="book_img"]');
+        console.log(imgInput);
 
-        form.append('book_img', img);
-
-        if (img.files.length > 0 ) {
-            // add img to FormData
+        var form = new FormData();
+/*
+        if (imgInput.files.length > 0 ) {
+            // add image to FormData
             console.log("adding image");
-            form.append('book_img', img.files[0]);
-        }
-        console.log(img.files[0].name, img.files[0].size, img.files[0].type);
-        console.log(imgPath + img.files[0].name);
+            form.append('book_img', imgInput.files[0]);
+        }*/
+        formData.append('book_img', fileInput.files[0]);
+
+    const options = {
+      method: 'POST',
+      body: formData,
+      // If you add this, upload won't work
+      // headers: {
+      //   'Content-Type': 'multipart/form-data',
+      // }
+    };
+    
+    fetch(img, options);
+
+        console.log(imgInput.files[0].name, imgInput.files[0].size, imgInput.files[0].type);
+        console.log(imgPath + imgInput.files[0].name);
+
         form.append('isbn', document.querySelector('[name="isbn"]').value);
         form.append('title', document.querySelector('[name="title"]').value);
         form.append('author', document.querySelector('[name="author"]').value);
@@ -398,31 +418,37 @@ var book = {
         form.append('publisher', document.querySelector('[name="publisher"]').value);
         form.append('numOfPages', document.querySelector('[name="numOfPages"]').value);
 
-        const xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (xhttp.readyState == 4) {
-                    switch (xhttp.status) {
-                        case 200:
-                            console.log(xhttp.response);
-                            user.hideSpinner();
-                            user.exitAuthAndMsg('Book edited');
-                            break;
-                        case 403:
-                            console.log("please login to continue");
-                            book.backToFound();
-                            user.showLogin();
-                            user.hideSpinner();
-                            break;
-                        default:
-                        console.log('unknown error');
+        var url = this.apiServer + "/book/" + document.getElementById('isbn').innerText;
+
+        fetch(url, {
+            method: "PUT",
+            body: form,
+            headers: new Headers({
+                "Authorization": "Bearer: " + user.getToken(),
+            })
+        }).then(function(response) {
+            if (response.status !== 200) {
+                switch(response.status) {
+                    case 403:
+                        console.log("please login to continue");
+                        book.backToFound();
+                        user.showLogin();
+                        user.hideSpinner();
+                        break;
+                    default: 
+                        console.log('Looks like there was a problem. Status Code: ' + response.status);
                         user.showError("Unknown Error Occured. Server response not received. Try again later.");
-                        }
-                    }
-            };
-            xhttp.open("PUT", this.apiServer + "/book/" + document.getElementById('isbn').innerText, true);
-            xhttp.setRequestHeader("Authorization", "Bearer: " + user.getToken());
-            //xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-           // xhttp.send(JSON.stringify(book));
-           xhttp.send(form);
-        }
-    };
+                }
+                return;
+            }
+            response.json().then(function (data) {
+                console.log(data);
+                user.hideSpinner();
+                user.exitAuthAndMsg('Book edited');
+            });
+        })
+         .catch(function(err) {
+                console.log('Fetch Error :-S', err);
+        });
+    }
+}
