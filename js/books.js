@@ -411,7 +411,7 @@ var book = {
             method: "PUT",
             body: form,
             headers: new Headers({
-                "Authorization": "Bearer: " + user.getToken(),
+                "Authorization": "Bearer: " + user.getToken()
             })
         }).then(function(response) {
             if (response.status !== 200) {
