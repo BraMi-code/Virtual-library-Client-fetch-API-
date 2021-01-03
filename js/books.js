@@ -383,30 +383,17 @@ var book = {
         user.showSpinner();
 
         var imgPath = book.apiServer + "/";
-        var img = document.getElementById('bookImg').src;
-        console.log(img);
+
         var imgInput = document.querySelector('[name="book_img"]');
         console.log(imgInput);
 
         var form = new FormData();
-/*
+
         if (imgInput.files.length > 0 ) {
             // add image to FormData
             console.log("adding image");
             form.append('book_img', imgInput.files[0]);
-        }*/
-        formData.append('book_img', fileInput.files[0]);
-
-    const options = {
-      method: 'POST',
-      body: formData,
-      // If you add this, upload won't work
-      // headers: {
-      //   'Content-Type': 'multipart/form-data',
-      // }
-    };
-    
-    fetch(img, options);
+        }
 
         console.log(imgInput.files[0].name, imgInput.files[0].size, imgInput.files[0].type);
         console.log(imgPath + imgInput.files[0].name);
