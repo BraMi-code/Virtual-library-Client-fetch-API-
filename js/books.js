@@ -384,7 +384,7 @@ var book = {
 
         var imgPath = book.apiServer + "/";
 
-        var imgInput = document.querySelector('[name="book_img"]');
+        var imgInput = document.querySelector("input[type='file']");
         console.log(imgInput);
 
         var form = new FormData();
