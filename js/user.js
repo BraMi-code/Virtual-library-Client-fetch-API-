@@ -40,11 +40,33 @@ var user = {
         this.hideError();
         this.showSpinner();
 
-        var user = {
+        const user = {
             'email': email,
             'password': password
         }
-        const xhttp = new XMLHttpRequest();
+        const url = this.apiServer + '/user/login';
+
+        fetch(url, {
+            method: "POST",
+            headers: ({
+                "Content-Type": "application/json;charset=UTF-8"
+            }),
+            body: JSON.stringify(user)
+        })
+        .then(function (response) {
+            return response.json();
+        })
+        //Then with the data from the response in JSON...
+        .then(function (data) {
+            console.log('Success:', data);
+            book.showBookPage();
+        })
+        //Then with the error generated...
+        .catch(function (error) {
+        console.error('Error:', error);
+        })
+
+      /*  const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState == 4) {
                 this.hideSpinner();
@@ -71,7 +93,7 @@ var user = {
 
         xhttp.open("POST", this.apiServer + '/user/login', true);
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhttp.send(JSON.stringify(user));
+        xhttp.send(JSON.stringify(user));*/
     },
     signUpTemplate: `
         <div class="userAuth">
