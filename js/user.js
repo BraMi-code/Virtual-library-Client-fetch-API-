@@ -59,7 +59,6 @@ var user = {
         //Then with the data from the response in JSON...
         .then(function (data) {
             console.log('Success:', data);
-            book.showBookPage();
         })
         //Then with the error generated...
         .catch(function (error) {
