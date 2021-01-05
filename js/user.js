@@ -59,7 +59,10 @@ var user = {
         //Then with the data from the response in JSON...
         .then(function (data) {
             console.log('Success:', data);
+            console.log(data.token);
+            localStorage.setItem('token', data.token);
         })
+        .then(this.hideSpinner)
         //Then with the error generated...
         .catch(function (error) {
         console.error('Error:', error);
@@ -256,11 +259,9 @@ var user = {
         if (payload.exp > seconds) {
             console.log("Not expired!");
             return true;
-            // book.showBookPage();
         }
         else {
             console.log("Token expired!");
-            // user.showLogin();
             return false;
         }
     }
